@@ -9,7 +9,9 @@ inline constexpr char NAME[] = "Engine";
 inline constexpr int NUM_SQUARES = 120;
 
 enum {
-    EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK
+    wP, wN, wB, wR, wQ, wK,
+    bP, bN, bB, bR, bQ, bK,
+    EMPTY, OFFBOARD
 };
 
 enum {
@@ -32,24 +34,19 @@ enum {
     A5 = 61, B5, C5, D5, E5, F5, G5, H5,
     A6 = 71, B6, C6, D6, E6, F6, G6, H6,
     A7 = 81, B7, C7, D7, E7, F7, G7, H7,
-    A8 = 91, B8, C8, D8, E8, F8, G8, H8, NO_SQUARE
+    A8 = 91, B8, C8, D8, E8, F8, G8, H8, NO_SQ
 };
 
-struct Board {
+struct Game {
     Piece pieces[NUM_SQUARES];
 
-    Square kSquares[2];
+    Square kingSquares[2];
 
-    int side;
+    int sideToMove;
+    bool castlingRights[4];
     Square enPassantSquare;
-    int fiftyMove;
-
-    int ply;
-    int plyHist;
-
-    U64 posKey;
-
-
+    int halfMoves;
+    int reversibleMoves;
 };
 
 #endif

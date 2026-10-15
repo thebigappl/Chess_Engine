@@ -37,16 +37,34 @@ enum {
     A8 = 91, B8, C8, D8, E8, F8, G8, H8, NO_SQ
 };
 
-struct Game {
+struct Position {
     Piece pieces[NUM_SQUARES];
 
-    Square kingSquares[2];
+    Square kingSquares[2] = {E1, E8};
 
-    int sideToMove;
-    bool castlingRights[4];
-    Square enPassantSquare;
-    int halfMoves;
-    int reversibleMoves;
+    int sideToMove = WHITE;
+    bool castlingRights[4] = {false, false, false, false}; // wK, wQ, bK, bQ
+    Square enPassantSquare = -1;
+    int halfMoves = 0;
+    int reversibleMoves = 0;
+
+    Position() {
+        for (int i = 0; i < NUM_SQUARES; i++) {
+            pieces[i] = OFFBOARD;
+        }
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                pieces[(i + 2) * 10 + (j + 1)] = EMPTY;
+            }
+        }
+    }
+};
+
+struct Move {
+    Square from;
+    Square to;
+    int promotionPiece = EMPTY;
 };
 
 #endif

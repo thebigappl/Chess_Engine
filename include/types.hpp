@@ -48,6 +48,7 @@ struct Position {
     int halfMoves = 0;
     int reversibleMoves = 0;
 
+    // Initialise a board containing 64 EMPTY squares and the remaining 56 are OFFBOARD
     Position() {
         for (int i = 0; i < NUM_SQUARES; i++) {
             pieces[i] = OFFBOARD;

@@ -8,6 +8,11 @@ int getPieceType(Piece piece);
 bool isSameColour(int colour, Piece targetPiece);
 void addKnightMoves(const Position& pos, int from, vector<Move>& moves);
 void addPawnMoves(const Position& pos, int from, vector<Move>& moves);
+void addPawnPromotionMoves(Piece pawn, int from, int targetSquare, vector<Move>& moves);
+int getRank(int square);
+int getFile(int square);
+bool isStartingPosition(int colour, int rank);
+bool isPromotionRank(int colour, int rank);
 
 bool isSlidingPiece[6] = {false, false, true, true, true, false};
 int numDirections[6] = {0, 8, 4, 4, 8, 8};
@@ -19,6 +24,9 @@ int moveDirections[6][8] = {
     { -11, -10, -9, -1, 1,  9, 10, 11 }, // Queen
     { -11, -10, -9, -1, 1,  9, 10, 11 }  // King
 };
+int pawnDirections[2] = {1, -1};
+int captureDirections[2] = {11, 9};
+int castlingDirections[2] = {1, -1};
 
 // Assumes `from` contains a sliding piece of the side to move.
 void addSlidingMoves(const Position& pos, int from, int pieceType, vector<Move>& moves) {
@@ -61,6 +69,24 @@ bool isSameColour(int colour, Piece targetPiece) {
     return false;
 }
 
+int getRank(int square) {
+    return (square - A1) / 10;
+}
+
+int getFile(int square) {
+    return (square - 1) % 10;
+}
+
+bool isStartingPosition(int colour, int rank) {
+    return ((colour == WHITE && rank == RANK_2) ||
+            (colour == BLACK && rank == RANK_7));
+}
+
+bool isPromotionRank(int colour, int rank) {
+    return ((colour == WHITE && rank == RANK_8) || 
+            (colour == BLACK && rank == RANK_1));
+}
+
 void addKnightMoves(const Position& pos, int from, vector<Move>& moves) {
     const Piece *board = pos.pieces;
     int colour = pos.sideToMove;
@@ -81,27 +107,76 @@ void addPawnMoves(const Position& pos, int from, vector<Move>& moves) {
     const Piece *board = pos.pieces;
     int colour = pos.sideToMove;
     int enPassantSquare = pos.enPassantSquare;
+    int fromRank = getRank(from);
+    int pawnDirection = pawnDirections[colour];
+    int forwardDirection = pawnDirection * 10;
 
     // First check normal pawn movement
-    int targetSquare = from - 10;
+    int targetSquare = from + forwardDirection;
+    int targetRank = getRank(targetSquare);
     int targetPiece = board[targetSquare];
-    if (targetPiece == EMPTY) moves.push_back({from, targetSquare});
+    if (targetPiece == EMPTY) {
+        if (isPromotionRank(colour, targetRank)) {
+            addPawnPromotionMoves(board[from], from, targetSquare, moves);
+        } else {
+            moves.push_back({from, targetSquare});
+        }
 
-    // Check pawn captures
-    // Left capture
-    targetSquare = from - 11;
-    targetPiece = board[targetSquare];
-    if ((targetPiece != EMPTY && targetPiece != OFFBOARD && !isSameColour(colour, targetPiece)) ||
-        from - 1 == enPassantSquare) {
-        moves.push_back({from, targetSquare});
+        if (isStartingPosition(colour, fromRank)) {
+            int doubleTarget = targetSquare + forwardDirection;
+
+            if (board[doubleTarget] == EMPTY) moves.push_back({from, doubleTarget});
+        }
     }
 
-    // Right capture
-    targetSquare = from - 9;
-    targetPiece = board[targetSquare];
-    if ((targetPiece != EMPTY && targetPiece != OFFBOARD && !isSameColour(colour, targetPiece)) ||
-        from + 1 == enPassantSquare) {
-        moves.push_back({from, targetSquare});
+    // Check pawn captures (including en passant)
+    for (int direction : captureDirections) {
+        targetSquare = from + direction;
+        targetPiece = board[targetSquare];
+        if ((targetPiece != EMPTY && targetPiece != OFFBOARD && !isSameColour(colour, targetPiece)) ||
+            (targetSquare == enPassantSquare && enPassantSquare != -1)) {
+            if (isPromotionRank(colour, targetRank)) {
+                addPawnPromotionMoves(board[from], from, targetSquare, moves);
+            } else {
+                moves.push_back({from, targetSquare});
+            }
+        }
+    }
+}
+
+void addPawnPromotionMoves(Piece pawn, int from, int targetSquare, vector<Move>& moves) {
+    for (int i = 1; i <= 4; i++) {
+        moves.push_back({from, targetSquare, pawn + i});
+    }
+}
+
+void addKingMoves(const Position& pos, int from, vector<Move>& moves) {
+    const Piece *board = pos.pieces;
+    int colour = pos.sideToMove;
+    int n = numDirections[KING];
+    for (int i = 0; i < n; i++) {
+        int targetSquare = from + moveDirections[KING][i];
+        int targetPiece = board[targetSquare];
+
+        if (targetPiece == OFFBOARD) continue;
+        if (targetPiece == EMPTY || !isSameColour(colour, targetPiece)) moves.push_back({from, targetSquare});
+    }
+
+    for (int i = 0; i < 2; i++) {
+        if (pos.canCastle[colour * 2 + i]) {
+            int numSquares = (i == KINGSIDE) ? 2 : 3;
+            bool valid = true;
+            for (int j = 1; j <= numSquares; j++) {
+                int targetSquare = from + j * castlingDirections[i];
+                int targetPiece = board[targetSquare];
+
+                if (targetPiece != EMPTY) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) moves.push_back({from, from + castlingDirections[i] * 2});
+        }
     }
 }
 
@@ -123,9 +198,11 @@ vector<Move> generateMoves(const Position& pos) {
         } else if (pieceType == KNIGHT) {
             addKnightMoves(pos, i, moves);
         } else if (pieceType == PAWN) {
-            // addPawnMoves(...)
+            addPawnMoves(pos, i, moves);
+        } else if (pieceType == KING) {
+            addKingMoves(pos, i, moves);
         }
-        // king moves, etc...
+        // etc...
     }
 
     return moves;

@@ -27,6 +27,10 @@ enum {
 };
 
 enum {
+    KINGSIDE, QUEENSIDE
+};
+
+enum {
     A1 = 21, B1, C1, D1, E1, F1, G1, H1,
     A2 = 31, B2, C2, D2, E2, F2, G2, H2,
     A3 = 41, B3, C3, D3, E3, F3, G3, H3,
@@ -43,7 +47,7 @@ struct Position {
     Square kingSquares[2] = {E1, E8};
 
     int sideToMove = WHITE;
-    bool castlingRights[4] = {false, false, false, false}; // wK, wQ, bK, bQ
+    bool canCastle[4] = {false, false, false, false}; // wK, wQ, bK, bQ
     Square enPassantSquare = -1;
     int halfMoves = 0;
     int reversibleMoves = 0;

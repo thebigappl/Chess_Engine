@@ -81,7 +81,7 @@ struct Position {
 struct Move {
     Square from;
     Square to;
-    int promotionPiece = EMPTY;
+    Piece promotionPiece = EMPTY;
 };
 
 struct UndoInfo {

@@ -4,6 +4,7 @@
 #include "constants.hpp"
 #include "board.hpp"
 #include "attacks.hpp"
+#include "move.hpp"
 #include <vector>
 #include <array>
 using namespace std;
@@ -153,4 +154,36 @@ vector<Move> generateMoves(const Position& pos) {
     }
 
     return moves;
+}
+
+vector<Move> generateLegalMoves(const Position& pos) {
+    Position testPos = pos;
+
+    vector<Move> pseudoLegalMoves = generateMoves(pos);
+    vector<Move> legalMoves;
+
+    int colour = pos.sideToMove;
+
+    for (Move move : pseudoLegalMoves) {
+        bool valid = true;
+        if (getPieceType(pos.pieces[move.from]) == KING && isCastle(move)) {
+            if (isInCheck(testPos, colour)) valid = false;
+
+            Square middleSquare = (move.from + move.to) / 2;
+            UndoInfo undo = makeMove(testPos, {move.from, middleSquare});
+
+            if (isInCheck(testPos, colour)) valid = false;
+
+            unmakeMove(testPos, {move.from, middleSquare}, undo);
+        }
+        UndoInfo undo = makeMove(testPos, move);
+
+        if (isInCheck(testPos, colour)) valid = false;
+
+        unmakeMove(testPos, move, undo);
+
+        if (valid) legalMoves.push_back(move);
+    }
+
+    return legalMoves;
 }

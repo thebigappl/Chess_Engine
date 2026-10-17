@@ -10,3 +10,5 @@ bool isKnightAttack(const Position& pos, int square, int attackingColour);
 bool isSlidingAttack(const Position& pos, int square, int attackingColour);
 bool isKingAttack(const Position& pos, int square, int attackingColour);
 bool isSquareAttacked(const Position& pos, int square, int attackingColour);
+
+bool isInCheck(const Position& pos, int colour);

@@ -2,7 +2,6 @@
 #include <cassert>
 #include <iostream>
 #include "types.hpp"
-#include "movegen.hpp"
 #include "move.hpp"
 using namespace std;
 

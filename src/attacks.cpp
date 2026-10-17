@@ -81,3 +81,7 @@ bool isSquareAttacked(const Position& pos, int square, int attackingColour) {
     if (isSlidingAttack(pos, square, attackingColour)) return true;
     return false;
 }
+
+bool isInCheck(const Position& pos, int colour) {
+    return isSquareAttacked(pos, pos.kingSquares[colour], (colour + 1) % 2);
+}

@@ -32,12 +32,10 @@ int castlingDirections[2] = {1, -1};
 void addSlidingMoves(const Position& pos, int from, int pieceType, vector<Move>& moves) {
     // Sliding move generation only
     const Piece *board = pos.pieces;
-    int n = numDirections[pieceType];
     int colour = pos.sideToMove;
-    for (int i = 0; i < n; i++) {
-        int direction = moveDirections[pieceType][i];
-        for (int j = 1; j < 8; j++) {
-            int targetSquare = from + j * direction;
+    for (int direction : moveDirections[pieceType]) {
+        for (int i = 1; i < 8; i++) {
+            int targetSquare = from + i * direction;
             int targetPiece = board[targetSquare];
 
             if (targetPiece == OFFBOARD) break;
@@ -58,7 +56,7 @@ void addSlidingMoves(const Position& pos, int from, int pieceType, vector<Move>&
 
 // Gets the general pieceType (PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING or NONE)
 int getPieceType(Piece piece) {
-    if (piece == EMPTY) return NONE;
+    if (piece == EMPTY || piece == OFFBOARD) return NONE;
     return piece % 6;
 }
 
@@ -74,7 +72,7 @@ int getRank(int square) {
 }
 
 int getFile(int square) {
-    return (square - 1) % 10;
+    return (square - A1) % 10;
 }
 
 bool isStartingPosition(int colour, int rank) {
@@ -87,12 +85,17 @@ bool isPromotionRank(int colour, int rank) {
             (colour == BLACK && rank == RANK_1));
 }
 
+// Helper for checking if a move direction is diagonal
+bool isDiagonalDirection(int direction) {
+    return (direction == -9 || direction == 9 ||
+            direction == -11 || direction == 11);
+}
+
 void addKnightMoves(const Position& pos, int from, vector<Move>& moves) {
     const Piece *board = pos.pieces;
     int colour = pos.sideToMove;
-    int n = numDirections[KNIGHT];
-    for (int i = 0; i < n; i++) {
-        int targetSquare = from + moveDirections[KNIGHT][i];
+    for (int direction : moveDirections[KNIGHT]) {
+        int targetSquare = from + direction;
         int targetPiece = board[targetSquare];
 
         if (targetPiece == OFFBOARD) continue;
@@ -100,9 +103,6 @@ void addKnightMoves(const Position& pos, int from, vector<Move>& moves) {
     }
 }
 
-// Pawn moves is WIP, contains basically everything aside from promotions:
-// - normal pawn movement into promotion
-// - capture into promotion
 void addPawnMoves(const Position& pos, int from, vector<Move>& moves) {
     const Piece *board = pos.pieces;
     int colour = pos.sideToMove;
@@ -144,6 +144,7 @@ void addPawnMoves(const Position& pos, int from, vector<Move>& moves) {
     }
 }
 
+// This helper function assumes that `targetSquare` lies on the promotion rank
 void addPawnPromotionMoves(Piece pawn, int from, int targetSquare, vector<Move>& moves) {
     for (int i = 1; i <= 4; i++) {
         moves.push_back({from, targetSquare, pawn + i});
@@ -153,9 +154,8 @@ void addPawnPromotionMoves(Piece pawn, int from, int targetSquare, vector<Move>&
 void addKingMoves(const Position& pos, int from, vector<Move>& moves) {
     const Piece *board = pos.pieces;
     int colour = pos.sideToMove;
-    int n = numDirections[KING];
-    for (int i = 0; i < n; i++) {
-        int targetSquare = from + moveDirections[KING][i];
+    for (int direction : moveDirections[KING]) {
+        int targetSquare = from + direction;
         int targetPiece = board[targetSquare];
 
         if (targetPiece == OFFBOARD) continue;
@@ -178,6 +178,89 @@ void addKingMoves(const Position& pos, int from, vector<Move>& moves) {
             if (valid) moves.push_back({from, from + castlingDirections[i] * 2});
         }
     }
+}
+
+//
+// Functions for checking basic position validation (king safety through isSquareAttacked)
+//
+bool isPawnAttack(const Position& pos, int square, int attackingColour) {
+    int attackDirection = pawnDirections[attackingColour];
+    const Piece *board = pos.pieces;
+    for (int direction : captureDirections) {
+        int targetSquare = square - attackDirection * direction;
+        int targetPiece = board[targetSquare];
+        if (targetPiece == OFFBOARD || targetPiece == EMPTY) continue;
+        if (getPieceType(targetPiece) == PAWN && 
+            isSameColour(attackingColour, targetPiece)) return true;
+    }
+    return false;
+}
+
+bool isKnightAttack(const Position& pos, int square, int attackingColour) {
+    const Piece *board = pos.pieces;
+    for (int direction : moveDirections[KNIGHT]) {
+        int targetSquare = square + direction;
+        int targetPiece = board[targetSquare];
+        if (targetPiece == OFFBOARD || targetPiece == EMPTY) continue;
+        if (getPieceType(targetPiece) == KNIGHT &&
+            isSameColour(attackingColour, targetPiece)) return true;
+    }
+    return false;
+}
+
+bool isSlidingAttack(const Position& pos, int square, int attackingColour) {
+    const Piece *board = pos.pieces;
+    for (int direction : moveDirections[QUEEN]) {
+        for (int i = 1; i < 8; i++) {
+            int targetSquare = square + i * direction;
+            int targetPiece = board[targetSquare];
+
+            if (targetPiece == OFFBOARD) break;
+
+            if (targetPiece == EMPTY) continue;
+
+            if (!isSameColour(attackingColour, targetPiece)) break;
+
+            int pieceType = getPieceType(targetPiece);
+            bool diagonal = isDiagonalDirection(direction);
+
+            if (diagonal) {
+                if (pieceType == BISHOP || pieceType == QUEEN) return true;
+            } else {
+                if (pieceType == ROOK || pieceType == QUEEN) return true;
+            }
+            break;
+        }
+    }
+    return false;
+}
+
+bool isKingAttack(const Position& pos, int square, int attackingColour) {
+    const Piece *board = pos.pieces;
+    for (int direction : moveDirections[KING]) {
+        int targetSquare = square + direction;
+        int targetPiece = board[targetSquare];
+        if (targetPiece == OFFBOARD || targetPiece == EMPTY) continue;
+        if (getPieceType(targetPiece) == KING &&
+            isSameColour(attackingColour, targetPiece)) return true;
+    }
+    return false;
+}
+
+bool isSquareAttacked(const Position& pos, int square, int attackingColour) {
+    if (isPawnAttack(pos, square, attackingColour)) return true;
+    if (isKnightAttack(pos, square, attackingColour)) return true;
+    if (isKingAttack(pos, square, attackingColour)) return true;
+    if (isSlidingAttack(pos, square, attackingColour)) return true;
+    return false;
+}
+
+void makeMove() {
+
+}
+
+void unmakeMove() {
+    
 }
 
 

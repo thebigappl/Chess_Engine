@@ -1,6 +1,8 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
+#include <array>
+using namespace std;
 using U64 = unsigned long long;
 using Square = int;
 using Piece = int;
@@ -44,13 +46,13 @@ enum {
 struct Position {
     Piece pieces[NUM_SQUARES];
 
-    Square kingSquares[2] = {E1, E8};
+    array<Square, 2> kingSquares = {E1, E8};
 
     int sideToMove = WHITE;
-    bool canCastle[4] = {false, false, false, false}; // wK, wQ, bK, bQ
+    array<bool, 4> canCastle = {true, true, true, true}; // wK, wQ, bK, bQ
     Square enPassantSquare = -1;
     int halfMoves = 0;
-    int reversibleMoves = 0;
+    int halfMoveClock = 0;
 
     // Initialise a board containing 64 EMPTY squares and the remaining 56 are OFFBOARD
     Position() {
@@ -70,6 +72,18 @@ struct Move {
     Square from;
     Square to;
     int promotionPiece = EMPTY;
+};
+
+struct UndoInfo {
+    Piece capturedPiece;
+    Square captureSquare;
+
+    array<Square, 2> previousKingSquares;
+
+    Square previousEnPassantSquare;
+    array<bool, 4> previousCanCastle;
+
+    int previousHalfMoveClock;
 };
 
 #endif

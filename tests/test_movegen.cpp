@@ -1,7 +1,7 @@
 #include <cassert>
 #include <bits/stdc++.h>
-#include "../include/types.hpp"
-#include "../include/movegen.hpp"
+#include "types.hpp"
+#include "movegen.hpp"
 using namespace std;
 
 void printMoves(vector<Move>& moves) {

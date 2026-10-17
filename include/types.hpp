@@ -1,5 +1,4 @@
-#ifndef TYPES_HPP
-#define TYPES_HPP
+#pragma once
 
 #include <array>
 using namespace std;
@@ -14,6 +13,17 @@ enum {
     wP, wN, wB, wR, wQ, wK,
     bP, bN, bB, bR, bQ, bK,
     EMPTY, OFFBOARD
+};
+
+// Use this enum for general piece type and indexing
+enum {
+    PAWN,
+    KNIGHT,
+    BISHOP,
+    ROOK,
+    QUEEN,
+    KING,
+    NONE
 };
 
 enum {
@@ -85,5 +95,3 @@ struct UndoInfo {
 
     int previousHalfMoveClock;
 };
-
-#endif

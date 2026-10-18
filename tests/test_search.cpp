@@ -24,10 +24,11 @@ void testMateInOne() {
 
     makeMove(pos, {G7, G6});
     
-    Move bestMove = findBestMove(pos, 2);
+    U64 nodes = 0;
+    SearchResult searchRes = findBestMove(pos, 2);
 
-    assert(bestMove.from == H5);
-    assert(bestMove.to == G6);
+    assert(searchRes.bestMove.from == H5);
+    assert(searchRes.bestMove.to == G6);
 
     cout << "testMateInOne passed!\n";
 }

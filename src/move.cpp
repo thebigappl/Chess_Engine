@@ -20,6 +20,7 @@ UndoInfo makeMove(Position& pos, Move move) {
 
     // Store previous state
     UndoInfo undo;
+    undo.movedPiece = board[move.from];
     undo.capturedPiece = board[move.to];
     undo.captureSquare = move.to;
     undo.previousKingSquares = pos.kingSquares;
@@ -105,26 +106,23 @@ void unmakeMove(Position& pos, Move move, const UndoInfo& undo) {
     Piece *board = pos.pieces;
 
     // Move the moving piece back to its original square
-    board[move.from] = board[move.to];
-
-    // If the move was a pawn promotion, revert the pawn back
-    if (move.promotionPiece != EMPTY) board[move.from] -= getPieceType(board[move.from]);
+    board[move.from] = undo.movedPiece;
+    board[move.to] = EMPTY;
 
     // Place the captured piece back on the capture square
     board[undo.captureSquare] = undo.capturedPiece;
 
     // If last move was a castle, also move the rook back
-    if (isCastle(move)) {
-        Square rookSquare;
-        Square newRookSquare;
+    if (isCastle(move) && getPieceType(undo.movedPiece) == KING) {
+        Square rookSquare, origRookSquare;
         if (move.to > move.from) {
-            rookSquare = move.from - 1;
-            newRookSquare = move.to + 3;
+            rookSquare = move.to - 1;
+            origRookSquare = move.to + 1;
         } else {
-            rookSquare = move.from + 1;
-            newRookSquare = move.to - 4;
+            rookSquare = move.to + 1;
+            origRookSquare = move.to - 2;
         }
-        board[newRookSquare] = board[rookSquare];
+        board[origRookSquare] = board[rookSquare];
         board[rookSquare] = EMPTY;
     }
 

@@ -2,5 +2,5 @@
 
 #include "types.hpp"
 
-int negamax(Position& pos, int depth);
-Move findBestMove(Position& pos, int depth);
+int search(Position& pos, int depth, int ply, U64& nodes);
+SearchResult findBestMove(Position& pos, int depth);

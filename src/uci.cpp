@@ -178,7 +178,7 @@ void runUci() {
             if (legalMoves.empty()) {
                 cout << "0000\n";
             } else {
-                Move bestMove = findBestMove(pos, depth);
+                Move bestMove = findBestMove(pos, depth).bestMove;
                 cout << squareToStr(bestMove.from) << squareToStr(bestMove.to);
                 
                 if (bestMove.promotionPiece != EMPTY) {

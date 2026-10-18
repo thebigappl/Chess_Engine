@@ -21,3 +21,4 @@ inline constexpr int originalRookPositions[4] = {H1, A1, H8, A8};
 // eval + search
 inline constexpr int pieceValues[6] = {100, 300, 300, 500, 900, 0};
 inline constexpr int MATE_SCORE = 100000;
+inline constexpr int INFINITY_SCORE = 1000000;

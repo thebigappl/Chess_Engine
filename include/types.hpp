@@ -86,6 +86,7 @@ struct Move {
 };
 
 struct UndoInfo {
+    Piece movedPiece;
     Piece capturedPiece;
     Square captureSquare;
 
@@ -107,4 +108,10 @@ struct SearchLimits {
     int binc = 0;
 
     int movestogo = 0;
+};
+
+struct SearchResult {
+    Move bestMove{};
+    int score = 0;
+    U64 nodes = 0;
 };

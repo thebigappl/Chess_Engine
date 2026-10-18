@@ -1,16 +1,9 @@
-#include <bits/stdc++.h>
-#include "../include/types.hpp"
+#include "types.hpp"
+#include "uci.hpp"
 using namespace std;
 
 int main() {
-    // Initialise new game
-    Position pos;
-    // Print empty position
-    for (int i = 0; i < NUM_SQUARES; i++) {
-        if (i % 10 == 0) cout << endl;
-        cout << pos.pieces[i] << " ";
-    }
-    cout << endl;
+    runUci();
 
     return 0;
 }

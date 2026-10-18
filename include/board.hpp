@@ -2,7 +2,7 @@
 
 #include "types.hpp"
 
-int getRank(int square);
-int getFile(int square);
+int getRank(Square square);
+int getFile(Square square);
 bool isStartingPosition(int colour, int rank);
 bool isPromotionRank(int colour, int rank);

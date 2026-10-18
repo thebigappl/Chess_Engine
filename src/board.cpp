@@ -1,10 +1,10 @@
 #include "types.hpp"
 
-int getRank(int square) {
+int getRank(Square square) {
     return (square - A1) / 10;
 }
 
-int getFile(int square) {
+int getFile(Square square) {
     return (square - A1) % 10;
 }
 

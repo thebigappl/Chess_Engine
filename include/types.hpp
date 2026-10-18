@@ -6,7 +6,8 @@ using U64 = unsigned long long;
 using Square = int;
 using Piece = int;
 
-inline constexpr char NAME[] = "Engine";
+inline constexpr char NAME[] = "ACE";
+inline constexpr char AUTHOR[] = "Aaron Pech";
 inline constexpr int NUM_SQUARES = 120;
 
 enum {
@@ -94,4 +95,16 @@ struct UndoInfo {
     array<bool, 4> previousCanCastle;
 
     int previousHalfMoveClock;
+};
+
+struct SearchLimits {
+    int depth = 0;
+
+    int wtime = -1;
+    int btime = -1;
+
+    int winc = 0;
+    int binc = 0;
+
+    int movestogo = 0;
 };

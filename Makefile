@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -std=c++20 -Wall -Wextra -g
 CPPFLAGS = -Iinclude
 
-ENGINE_SRC = src/main.cpp src/movegen.cpp src/position.cpp
+ENGINE_SRC = src/main.cpp src/uci.cpp $(TEST_COMMON_SRC)
 TEST_COMMON_SRC = src/movegen.cpp \
                   src/position.cpp \
                   src/board.cpp \

@@ -1,7 +1,10 @@
 #include <cassert>
-#include <bits/stdc++.h>
+#include <iostream>
 #include "types.hpp"
 #include "movegen.hpp"
+#include "position.hpp"
+#include "move.hpp"
+#include "attacks.hpp"
 using namespace std;
 
 void printMoves(vector<Move>& moves) {
@@ -86,11 +89,37 @@ void testBlockedBishop() {
     cout << "testOpenBishop passed!\n";
 }
 
+void testLegalMoves() {
+    Position pos;
+    initialiseStartingPosition(pos);
+
+    // Let's play an actual chess opening
+
+    makeMove(pos, {E2, E4});
+    makeMove(pos, {H7, H6});
+    makeMove(pos, {E4, E5});
+    makeMove(pos, {F7, F5});
+    makeMove(pos, {D1, H5});
+
+    assert(generateLegalMoves(pos).size() == 1);
+
+    makeMove(pos, {G7, G6});
+    makeMove(pos, {H5, G6});
+
+    vector<Move> legalMoves = generateLegalMoves(pos);
+    printMoves(legalMoves);
+
+    assert(isCheckmate(pos) == true);
+
+    cout << "testLegalMoves passed!\n";
+}
+
 int main() {
     testOpenRook();
     testBlockedRook();
     testOpenBishop();
     testBlockedBishop();
+    testLegalMoves();
 
     cout << "All tests passed!\n";
     return 0;

@@ -96,7 +96,7 @@ UndoInfo makeMove(Position& pos, Move move) {
     }
 
     pos.sideToMove = (pos.sideToMove + 1) % 2;
-    pos.halfMoves++;
+    pos.ply++;
 
     return undo;
 }
@@ -134,5 +134,5 @@ void unmakeMove(Position& pos, Move move, const UndoInfo& undo) {
     pos.enPassantSquare = undo.previousEnPassantSquare;
     pos.halfMoveClock = undo.previousHalfMoveClock;
     pos.sideToMove = (pos.sideToMove + 1) % 2;
-    pos.halfMoves--;
+    pos.ply--;
 }

@@ -84,7 +84,7 @@ void addPawnMoves(const Position& pos, int from, vector<Move>& moves) {
 
     // Check pawn captures (including en passant)
     for (int direction : captureDirections) {
-        targetSquare = from + direction;
+        targetSquare = from + direction * pawnDirection;
         targetPiece = board[targetSquare];
         if ((targetPiece != EMPTY && targetPiece != OFFBOARD && !isSameColour(colour, targetPiece)) ||
             (targetSquare == enPassantSquare && enPassantSquare != -1)) {

@@ -13,7 +13,7 @@ void assertPositionEqual(const Position& a, const Position& b) {
     assert(a.canCastle == b.canCastle);
     assert(a.enPassantSquare == b.enPassantSquare);
     assert(a.halfMoveClock == b.halfMoveClock);
-    assert(a.halfMoves == b.halfMoves);
+    assert(a.ply == b.ply);
     assert(a.kingSquares == b.kingSquares);
     assert(a.sideToMove == b.sideToMove);
 }

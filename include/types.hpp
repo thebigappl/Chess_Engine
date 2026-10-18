@@ -61,7 +61,7 @@ struct Position {
     int sideToMove = WHITE;
     array<bool, 4> canCastle = {true, true, true, true}; // wK, wQ, bK, bQ
     Square enPassantSquare = -1;
-    int halfMoves = 0;
+    int ply = 0;
     int halfMoveClock = 0;
 
     // Initialise a board containing 64 EMPTY squares and the remaining 56 are OFFBOARD

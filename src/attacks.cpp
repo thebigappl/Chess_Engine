@@ -1,5 +1,7 @@
 #include "pieces.hpp"
 #include "constants.hpp"
+#include "movegen.hpp"
+#include <vector>
 
 // Helper for checking if a move direction is diagonal
 bool isDiagonalDirection(int direction) {
@@ -84,4 +86,16 @@ bool isSquareAttacked(const Position& pos, int square, int attackingColour) {
 
 bool isInCheck(const Position& pos, int colour) {
     return isSquareAttacked(pos, pos.kingSquares[colour], (colour + 1) % 2);
+}
+
+bool isCheckmate(const Position& pos) {
+    return isInCheck(pos, pos.sideToMove) && generateLegalMoves(pos).empty();
+}
+
+bool isStalemate(const Position& pos) {
+    return !isInCheck(pos, pos.sideToMove) && generateLegalMoves(pos).empty();
+}
+
+bool isFiftyMoveDraw(const Position& pos) {
+    return pos.halfMoveClock >= 100;
 }

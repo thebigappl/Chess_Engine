@@ -8,7 +8,7 @@ void initialiseStartingPosition(Position& pos) {
     pos.sideToMove = WHITE;
     pos.canCastle.fill(true);
     pos.enPassantSquare = -1;
-    pos.halfMoves = 0;
+    pos.ply = 0;
     pos.halfMoveClock = 0;
 
     Piece *board = pos.pieces;

@@ -89,11 +89,11 @@ bool isInCheck(const Position& pos, int colour) {
 }
 
 bool isCheckmate(const Position& pos) {
-    return isInCheck(pos, pos.sideToMove) && generateLegalMoves(pos).empty();
+    return isInCheck(pos, pos.sideToMove) && generateLegalMoves(pos).count == 0;
 }
 
 bool isStalemate(const Position& pos) {
-    return !isInCheck(pos, pos.sideToMove) && generateLegalMoves(pos).empty();
+    return !isInCheck(pos, pos.sideToMove) && generateLegalMoves(pos).count == 0;
 }
 
 bool isFiftyMoveDraw(const Position& pos) {

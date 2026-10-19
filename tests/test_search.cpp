@@ -20,7 +20,7 @@ void testMateInOne() {
     makeMove(pos, {F7, F5});
     makeMove(pos, {D1, H5});
 
-    assert(generateLegalMoves(pos).size() == 1);
+    assert(generateLegalMoves(pos).count == 1);
 
     makeMove(pos, {G7, G6});
     

@@ -174,15 +174,15 @@ void runUci() {
 
             cout << "bestmove ";
 
-            auto legalMoves = generateLegalMoves(pos);
-            if (legalMoves.empty()) {
+            auto legalMoveList = generateLegalMoves(pos);
+            if (legalMoveList.count == 0) {
                 cout << "0000\n";
             } else {
                 Move bestMove = findBestMove(pos, depth).bestMove;
                 cout << squareToStr(bestMove.from) << squareToStr(bestMove.to);
                 
                 if (bestMove.promotionPiece != EMPTY) {
-                    cout << pieceTypeToStr(getPieceType(pos.pieces[bestMove.from]));
+                    cout << pieceTypeToStr(getPieceType(bestMove.promotionPiece));
                 }
 
                 cout << '\n';

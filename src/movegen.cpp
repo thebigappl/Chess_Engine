@@ -10,14 +10,14 @@
 using namespace std;
 
 // This helper function assumes that `targetSquare` lies on the promotion rank
-void addPawnPromotionMoves(Piece pawn, int from, int targetSquare, vector<Move>& moves) {
+void addPawnPromotionMoves(Piece pawn, int from, int targetSquare, MoveList& moveList) {
     for (int i = 1; i <= 4; i++) {
-        moves.push_back({from, targetSquare, pawn + i});
+        moveList.moves[moveList.count++] = {from, targetSquare, pawn + i};
     }
 }
 
 // Assumes `from` contains a sliding piece of the side to move.
-void addSlidingMoves(const Position& pos, int from, int pieceType, vector<Move>& moves) {
+void addSlidingMoves(const Position& pos, int from, int pieceType, MoveList& moveList) {
     // Sliding move generation only
     const Piece *board = pos.pieces;
     int colour = pos.sideToMove;
@@ -29,20 +29,20 @@ void addSlidingMoves(const Position& pos, int from, int pieceType, vector<Move>&
             if (targetPiece == OFFBOARD) break;
 
             if (targetPiece == EMPTY) {
-                moves.push_back({from, targetSquare});
+                moveList.moves[moveList.count++] = {from, targetSquare};
                 continue;
             }
             if (isSameColour(colour, targetPiece)) {
                 break;
             } else {
-                moves.push_back({from, targetSquare});
+                moveList.moves[moveList.count++] = {from, targetSquare};
                 break;
             }
         }
     }
 }
 
-void addKnightMoves(const Position& pos, int from, vector<Move>& moves) {
+void addKnightMoves(const Position& pos, int from, MoveList& moveList) {
     const Piece *board = pos.pieces;
     int colour = pos.sideToMove;
     for (int direction : moveDirections[KNIGHT]) {
@@ -50,11 +50,13 @@ void addKnightMoves(const Position& pos, int from, vector<Move>& moves) {
         int targetPiece = board[targetSquare];
 
         if (targetPiece == OFFBOARD) continue;
-        if (targetPiece == EMPTY || !isSameColour(colour, targetPiece)) moves.push_back({from, targetSquare});
+        if (targetPiece == EMPTY || !isSameColour(colour, targetPiece)) {
+            moveList.moves[moveList.count++] = {from, targetSquare};
+        }
     }
 }
 
-void addPawnMoves(const Position& pos, int from, vector<Move>& moves) {
+void addPawnMoves(const Position& pos, int from, MoveList& moveList) {
     const Piece *board = pos.pieces;
     int colour = pos.sideToMove;
     int enPassantSquare = pos.enPassantSquare;
@@ -69,16 +71,18 @@ void addPawnMoves(const Position& pos, int from, vector<Move>& moves) {
     if (targetPiece == EMPTY) {
         // To promote or not
         if (isPromotionRank(colour, targetRank)) {
-            addPawnPromotionMoves(board[from], from, targetSquare, moves);
+            addPawnPromotionMoves(board[from], from, targetSquare, moveList);
         } else {
-            moves.push_back({from, targetSquare});
+            moveList.moves[moveList.count++] = {from, targetSquare};
         }
 
         // Pawn double push
         if (isStartingPosition(colour, fromRank)) {
             int doubleTarget = targetSquare + forwardDirection;
 
-            if (board[doubleTarget] == EMPTY) moves.push_back({from, doubleTarget});
+            if (board[doubleTarget] == EMPTY) {
+                moveList.moves[moveList.count++] = {from, doubleTarget};
+            }
         }
     }
 
@@ -89,15 +93,15 @@ void addPawnMoves(const Position& pos, int from, vector<Move>& moves) {
         if ((targetPiece != EMPTY && targetPiece != OFFBOARD && !isSameColour(colour, targetPiece)) ||
             (targetSquare == enPassantSquare && enPassantSquare != -1)) {
             if (isPromotionRank(colour, targetRank)) {
-                addPawnPromotionMoves(board[from], from, targetSquare, moves);
+                addPawnPromotionMoves(board[from], from, targetSquare, moveList);
             } else {
-                moves.push_back({from, targetSquare});
+                moveList.moves[moveList.count++] = {from, targetSquare};
             }
         }
     }
 }
 
-void addKingMoves(const Position& pos, int from, vector<Move>& moves) {
+void addKingMoves(const Position& pos, int from, MoveList& moveList) {
     const Piece *board = pos.pieces;
     int colour = pos.sideToMove;
     for (int direction : moveDirections[KING]) {
@@ -105,7 +109,9 @@ void addKingMoves(const Position& pos, int from, vector<Move>& moves) {
         int targetPiece = board[targetSquare];
 
         if (targetPiece == OFFBOARD) continue;
-        if (targetPiece == EMPTY || !isSameColour(colour, targetPiece)) moves.push_back({from, targetSquare});
+        if (targetPiece == EMPTY || !isSameColour(colour, targetPiece)) {
+            moveList.moves[moveList.count++] = {from, targetSquare};
+        }
     }
 
     for (int i = 0; i < 2; i++) {
@@ -121,7 +127,9 @@ void addKingMoves(const Position& pos, int from, vector<Move>& moves) {
                     break;
                 }
             }
-            if (valid) moves.push_back({from, from + castlingDirections[i] * 2});
+            if (valid) {
+                moveList.moves[moveList.count++] = {from, from + castlingDirections[i] * 2};
+            }
         }
     }
 }
@@ -130,8 +138,8 @@ void addKingMoves(const Position& pos, int from, vector<Move>& moves) {
 // Focusing on only pseudo-legal moves currently
 // This function will only be for generating pseudo-legal moves as well
 // A new function `generateLegalMoves` will be used for filtering out illegal pseudo-legal moves
-vector<Move> generateMoves(const Position& pos) {
-    vector<Move> moves;
+MoveList generateMoves(const Position& pos) {
+    MoveList moveList;
     const Piece *board = pos.pieces;
     int colour = pos.sideToMove;
 
@@ -142,29 +150,29 @@ vector<Move> generateMoves(const Position& pos) {
 
         int pieceType = getPieceType(piece);
         if (isSlidingPiece[pieceType]) {
-            addSlidingMoves(pos, i, pieceType, moves);
+            addSlidingMoves(pos, i, pieceType, moveList);
         } else if (pieceType == KNIGHT) {
-            addKnightMoves(pos, i, moves);
+            addKnightMoves(pos, i, moveList);
         } else if (pieceType == PAWN) {
-            addPawnMoves(pos, i, moves);
+            addPawnMoves(pos, i, moveList);
         } else if (pieceType == KING) {
-            addKingMoves(pos, i, moves);
+            addKingMoves(pos, i, moveList);
         }
         // etc...
     }
 
-    return moves;
+    return moveList;
 }
 
-vector<Move> generateLegalMoves(const Position& pos) {
+MoveList generateLegalMoves(const Position& pos) {
     Position testPos = pos;
 
-    vector<Move> pseudoLegalMoves = generateMoves(pos);
-    vector<Move> legalMoves;
+    MoveList pseudoLegalMoveList = generateMoves(pos);
+    MoveList legalMoves;
 
     int colour = pos.sideToMove;
 
-    for (Move move : pseudoLegalMoves) {
+    for (const Move& move : pseudoLegalMoveList) {
         bool valid = true;
         if (getPieceType(pos.pieces[move.from]) == KING && isCastle(move)) {
             if (isInCheck(testPos, colour)) valid = false;
@@ -182,7 +190,7 @@ vector<Move> generateLegalMoves(const Position& pos) {
 
         unmakeMove(testPos, move, undo);
 
-        if (valid) legalMoves.push_back(move);
+        if (valid) legalMoves.moves[legalMoves.count++] = move;
     }
 
     return legalMoves;

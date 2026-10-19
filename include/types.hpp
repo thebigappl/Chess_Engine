@@ -115,3 +115,21 @@ struct SearchResult {
     int score = 0;
     U64 nodes = 0;
 };
+
+struct MoveList {
+    Move moves[256];
+    int count = 0;
+
+    Move* begin() {
+        return moves;
+    }
+    Move* end() {
+        return moves + count;
+    }
+    const Move* begin() const {
+        return moves;
+    }
+    const Move* end() const {
+        return moves + count;
+    }
+};

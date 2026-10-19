@@ -4,5 +4,5 @@
 #include "types.hpp"
 using namespace std;
 
-vector<Move> generateMoves(const Position& pos);
-vector<Move> generateLegalMoves(const Position& pos);
+MoveList generateMoves(const Position& pos);
+MoveList generateLegalMoves(const Position& pos);

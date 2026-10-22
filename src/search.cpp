@@ -9,7 +9,7 @@
 using namespace std;
 
 // Recursive search function for finding the best move
-int search(Position& pos, int depth, int ply, U64& nodes) {
+int search(Position& pos, int depth, int ply, U64& nodes, int alpha, int beta) {
     nodes++;
     int colour = pos.sideToMove;
     bool inCheck = isInCheck(pos, colour);
@@ -24,15 +24,16 @@ int search(Position& pos, int depth, int ply, U64& nodes) {
         // is from the perspective of the other player
         if (!isInCheck(pos, colour)) {
             if (depth > 0) {
-                int score = -search(pos, depth - 1, ply + 1, nodes);
-                if (score > bestScore) bestScore = score;
+                int score = -search(pos, depth - 1, ply + 1, nodes, -beta, -alpha);
+                bestScore = max(bestScore, score);
+                alpha = max(alpha, score);
             }
             valid = true;
         }
 
         unmakeMove(pos, move, undo);
 
-        if (valid && depth == 0) break;
+        if (alpha >= beta || (valid && depth == 0)) break;
     }
     
     if (!valid) return inCheck ? -(MATE_SCORE - ply) : 0;
@@ -56,7 +57,7 @@ SearchResult findBestMove(Position& pos, int depth) {
         UndoInfo undo = makeMove(pos, move);
 
         if (!isInCheck(pos, colour)) {
-            int score = -search(pos, depth - 1, 1, res.nodes);
+            int score = -search(pos, depth - 1, 1, res.nodes, -INFINITY_SCORE, INFINITY_SCORE);
             if (score > bestScore) {
                 bestScore = score;
                 bestMove = move;

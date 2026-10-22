@@ -99,3 +99,7 @@ bool isStalemate(const Position& pos) {
 bool isFiftyMoveDraw(const Position& pos) {
     return pos.halfMoveClock >= 100;
 }
+
+bool isCapture(const Position& pos, const Move& move) {
+    return pos.pieces[move.to] != EMPTY;
+}

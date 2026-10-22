@@ -2,6 +2,9 @@ CXX = g++
 CXXFLAGS = -std=c++20 -Wall -Wextra -g
 CPPFLAGS = -Iinclude
 
+DEBUG_FLAGS = -O0 -g3
+RELEASE_FLAGS = -O3 -DNDEBUG -march=native
+
 ENGINE_SRC = src/main.cpp src/uci.cpp $(TEST_COMMON_SRC)
 TEST_COMMON_SRC = src/movegen.cpp \
                   src/position.cpp \
@@ -23,7 +26,7 @@ TEST_BENCHMARK_SRC = tests/test_benchmark.cpp src/benchmark.cpp $(TEST_COMMON_SR
 all: chess
 
 chess: $(ENGINE_SRC)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(ENGINE_SRC) -o chess
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(RELEASE_FLAGS) $(ENGINE_SRC) -o chess
 
 test: test_movegen test_make_move test_attacks
 	./test_movegen
@@ -46,7 +49,7 @@ test_perft: $(TEST_PERFT_SRC)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TEST_PERFT_SRC) -o test_perft
 
 test_benchmark: $(TEST_BENCHMARK_SRC)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TEST_BENCHMARK_SRC) -o test_benchmark
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(RELEASE_FLAGS) $(TEST_BENCHMARK_SRC) -o test_benchmark
 
 clean:
 	rm -f chess test_movegen test_make_move test_attacks test_search test_perft test_benchmark

@@ -15,3 +15,4 @@ bool isInCheck(const Position& pos, int colour);
 bool isCheckmate(const Position& pos);
 bool isStalemate(const Position& pos);
 bool isFiftyMoveDraw(const Position& pos);
+bool isCapture(const Position& pos, const Move& move);

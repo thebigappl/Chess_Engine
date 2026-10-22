@@ -14,6 +14,9 @@ void testBenchmark() {
     benchmarkSearch(pos, 2);
     benchmarkSearch(pos, 3);
     benchmarkSearch(pos, 4);
+    benchmarkSearch(pos, 5);
+    benchmarkSearch(pos, 6);
+    benchmarkSearch(pos, 7);
 }
 
 int main() {

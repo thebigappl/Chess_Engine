@@ -120,7 +120,7 @@ void runUci() {
             istringstream iss(input);
 
             string command, option;
-            int depth = 6, wtime = -1, btime = -1, winc = 0, binc = 0, movestogo = 0;
+            int depth = 7, wtime = -1, btime = -1, winc = 0, binc = 0, movestogo = 0;
 
             SearchLimits lims;
 
@@ -164,6 +164,9 @@ void runUci() {
                         valid = false;
                         break;
                     }
+                } else if (option == "infinite") {
+                    // infinite is valid but doesn't do anything
+                    // special for now
                 } else {
                     valid = false;
                     break;

@@ -83,6 +83,12 @@ struct Move {
     Square from;
     Square to;
     Piece promotionPiece = EMPTY;
+
+    bool operator==(Move other) {
+        return from == other.from &&
+                to == other.to &&
+                promotionPiece == other.promotionPiece;
+    }
 };
 
 struct UndoInfo {
@@ -132,4 +138,9 @@ struct MoveList {
     const Move* end() const {
         return moves + count;
     }
+};
+
+struct ScoredMove {
+    Move move;
+    int priorityScore = 1;
 };

@@ -34,6 +34,7 @@ int quiescenceSearch(Position& pos, int ply, U64& nodes, int alpha, int beta, in
     nodes++;
     int standPatScore = evaluatePosition(pos);
     int colour = pos.sideToMove;
+    if (colour == BLACK) standPatScore = -standPatScore;
     bool inCheck = isInCheck(pos, colour);
 
     // Prevent Q-search from exploring too deep into tactical sequences
@@ -127,8 +128,7 @@ int search(Position& pos, int depth, int ply, U64& nodes, int alpha, int beta) {
     if (!isLegal) return inCheck ? -(MATE_SCORE - ply) : 0;
 
     if (depth == 0) {
-        int score = quiescenceSearch(pos, ply, nodes, alpha, beta, 0);
-        return colour == BLACK ? -score : score;
+        return quiescenceSearch(pos, ply, nodes, alpha, beta, 0);
     }
 
     return bestScore;
@@ -140,12 +140,29 @@ SearchResult findBestMove(Position& pos, int depth) {
     int colour = pos.sideToMove;
     int bestScore = -INFINITY_SCORE;
     Move bestMove;
-    Move prevBestMove{-1, -1, EMPTY};
     SearchResult res;
 
     // Move ordering setup
     ScoredMove priorityMoveList[256];
-    int n = moveList.count;
+    int n = 0;
+
+    // Reorder move list based on priority factors again
+    // Only get legal moves
+    for (const Move& move : moveList) {
+        UndoInfo undo = makeMove(pos, move);
+        if (!isInCheck(pos, colour)) {
+            priorityMoveList[n].move = move;
+            priorityMoveList[n].priorityScore = movePriorityScore(pos, move);
+            n++;
+        }
+        unmakeMove(pos, move, undo);
+    }
+
+    if (n == 0) {
+        res.bestMove = {-1, -1, EMPTY};
+        res.score = isInCheck(pos, colour) ? -MATE_SCORE : 0;
+        return res;
+    }
 
     // Iterative deepening loop
     for (int i = 1; i <= depth; i++) {
@@ -154,32 +171,30 @@ SearchResult findBestMove(Position& pos, int depth) {
         bestMove.to = -1;
         bestMove.promotionPiece = EMPTY;
         bestScore = -INFINITY_SCORE;
+        int alpha = -INFINITY_SCORE;
+        int beta = INFINITY_SCORE;
+        int bestIndex = -1;
 
-        // Reorder move list based on priority factors again
-        for (int j = 0; j < n; j++) {
-            priorityMoveList[j].move = moveList.moves[j];
-            priorityMoveList[j].priorityScore = movePriorityScore(pos, priorityMoveList[j].move);
-            if (priorityMoveList[j].move == prevBestMove) {
-                priorityMoveList[j].priorityScore += 100;
-            }
-        }
         sort(priorityMoveList, priorityMoveList + n, priorityComparisonRule);
 
-        for (int currMove = 0; currMove < n; currMove++) {
-            const Move& move = priorityMoveList[currMove].move;
+        for (int j = 0; j < n; j++) {
+            const Move& move = priorityMoveList[j].move;
             UndoInfo undo = makeMove(pos, move);
     
-            if (!isInCheck(pos, colour)) {
-                int score = -search(pos, i - 1, 1, res.nodes, -INFINITY_SCORE, INFINITY_SCORE);
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestMove = move;
-                }
+            // We don't need to check for checks because
+            // we've guaranteed this move is legal
+            int score = -search(pos, i - 1, 1, res.nodes, -beta, -alpha);
+            priorityMoveList[j].priorityScore = score;
+            if (score > bestScore) {
+                alpha = score;
+                bestScore = score;
+                bestMove = move;
+                bestIndex = j;
             }
     
             unmakeMove(pos, move, undo);
         }
-        prevBestMove = bestMove;
+        priorityMoveList[bestIndex].priorityScore = INFINITY_SCORE;
     }
 
     res.bestMove = bestMove;

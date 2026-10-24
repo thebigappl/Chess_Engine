@@ -23,3 +23,6 @@ inline constexpr int pieceValues[6] = {100, 300, 300, 500, 900, 0};
 inline constexpr int MATE_SCORE = 100000;
 inline constexpr int INFINITY_SCORE = 1000000;
 inline constexpr int MAX_Q_DEPTH = 5;
+
+// zobrist hashing
+inline ZobristKey zobrist;

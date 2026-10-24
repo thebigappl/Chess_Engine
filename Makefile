@@ -20,6 +20,7 @@ TEST_ATTACKS_SRC = tests/test_attacks.cpp $(TEST_COMMON_SRC)
 TEST_SEARCH_SRC = tests/test_search.cpp $(TEST_COMMON_SRC)
 TEST_PERFT_SRC = tests/test_perft.cpp src/perft.cpp $(TEST_COMMON_SRC)
 TEST_BENCHMARK_SRC = tests/test_benchmark.cpp src/benchmark.cpp $(TEST_COMMON_SRC)
+TEST_HASH_SRC = tests/test_hash.cpp $(TEST_COMMON_SRC)
 
 .PHONY: all test clean
 
@@ -50,6 +51,9 @@ test_perft: $(TEST_PERFT_SRC)
 
 test_benchmark: $(TEST_BENCHMARK_SRC)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(RELEASE_FLAGS) $(TEST_BENCHMARK_SRC) -o test_benchmark
+
+test_hash: $(TEST_HASH_SRC)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TEST_HASH_SRC) -o test_hash
 
 clean:
 	rm -f chess test_movegen test_make_move test_attacks test_search test_perft test_benchmark

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <random>
 using namespace std;
 using U64 = unsigned long long;
 using Square = int;
@@ -65,6 +66,8 @@ struct Position {
     int ply = 0;
     int halfMoveClock = 0;
 
+    U64 hash = 0;
+
     // Initialise a board containing 64 EMPTY squares and the remaining 56 are OFFBOARD
     Position() {
         for (int i = 0; i < NUM_SQUARES; i++) {
@@ -102,6 +105,7 @@ struct UndoInfo {
     array<bool, 4> previousCanCastle;
 
     int previousHalfMoveClock;
+    U64 previousHash;
 };
 
 struct SearchLimits {
@@ -143,4 +147,36 @@ struct MoveList {
 struct ScoredMove {
     Move move;
     int priorityScore = 1;
+};
+
+struct ZobristKey {
+    // Each piece-square combination
+    U64 pieceSquareKey[12][64];
+
+    U64 sideToMoveKey;
+
+    // Each combination of castling rights
+    U64 castlingKey[16];
+
+    // Each en passant file
+    U64 enPassantKey[8];
+
+    ZobristKey() {
+        mt19937_64 generator(12345);
+        for (int i = 0; i < 12; i++) {
+            for (int j = 0; j < 64; j++) {
+                pieceSquareKey[i][j] = generator();
+            }
+        }
+
+        sideToMoveKey = generator();
+
+        for (int i = 0; i < 16; i++) {
+            castlingKey[i] = generator();
+        }
+
+        for (int i = 0; i < 8; i++) {
+            enPassantKey[i] = generator();
+        }
+    }
 };

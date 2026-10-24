@@ -17,3 +17,7 @@ bool isPromotionRank(int colour, int rank) {
     return ((colour == WHITE && rank == RANK_8) || 
             (colour == BLACK && rank == RANK_1));
 }
+
+int getM64Index(Square square) {
+    return (getRank(square) * 8 + getFile(square));
+}

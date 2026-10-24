@@ -1,4 +1,6 @@
 #include "types.hpp"
+#include "board.hpp"
+#include "constants.hpp"
 
 // Assumes that `pos` is an empty board
 // This function is not well designed lol
@@ -52,4 +54,26 @@ void initialiseStartingPosition(Position& pos) {
     for (int i = A7; i <= H7; i++) {
         board[i] = bP;
     }
+}
+
+void initialisePositionHash(Position& pos) {
+    U64 localHash = 0;
+    for (int i = 0; i < NUM_SQUARES; i++) {
+        Piece targetPiece = pos.pieces[i];
+        if (targetPiece == OFFBOARD || targetPiece == EMPTY) continue;
+
+        int mb64Square = getM64Index(i);
+        localHash ^= zobrist.pieceSquareKey[targetPiece][mb64Square];
+    }
+
+    if (pos.sideToMove == BLACK) localHash ^= zobrist.sideToMoveKey;
+
+    int castlingIndex = 0;
+    for (int i = 0, j = 8; i < 4; i++, j /= 2) {
+        if (pos.canCastle[i]) castlingIndex += j;
+    }
+    localHash ^= zobrist.castlingKey[castlingIndex];
+
+    if (pos.enPassantSquare != -1) localHash ^= zobrist.enPassantKey[getFile(pos.enPassantSquare)];
+    pos.hash = localHash;
 }
